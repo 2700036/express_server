@@ -1,34 +1,44 @@
 const router = require('express').Router();
 const fs = require('fs');
-const path = require('path')
+const path = require('path');
+
 const usersPath = path.join(__dirname, '../data/users.json');
 
-router.get('/users', (req, res) => {  
+const sendUsers = (req, res) => {  
   fs.readFile(usersPath, {encoding: 'utf8'}, (err, data)=>{
     if(err){console.log(err);
       return
       }
       res.send(data)
-  })
-  
-})
+  })  
+};
+const requestedUser = (users, id) => users.find(({_id}) => _id === id)
 
-router.get('/users/:id', (req, res) => {
-  const { id } = req.params;  
-  const requestedUser = (users) => users.find(({_id}) => _id === id)
+const doesUserExist = (req, res, next) => {
+  const { id } = req.params;    
  
   fs.readFile(usersPath, {encoding: 'utf8'}, (err, data)=>{
     if(err){console.log(err);
       return
       }
-      if (!requestedUser(JSON.parse(data))){
-        res.statusCode = 404;
-        res.send({ 'message': 'Нет пользователя с таким id' })
+      if (!requestedUser(JSON.parse(data), id)){
+        res.status(404).send({ 'message': 'Нет пользователя с таким id' })
         return;
       }
-      res.send(requestedUser(JSON.parse(data)))
-  })
-  
-})
+      next();      
+  })  
+}
+
+const sendUser = (req, res, next) => {
+  const { id } = req.params;  
+  fs.readFile(usersPath, {encoding: 'utf8'}, (err, data)=>{
+      res.send(requestedUser(JSON.parse(data), id));
+        
+  })  
+}
+
+router.get('/users', sendUsers);
+router.get('/users/:id', doesUserExist);
+router.get('/users/:id', sendUser);
 
 module.exports = router;
