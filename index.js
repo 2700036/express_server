@@ -7,13 +7,11 @@ const cardsRoute = require('./routes/cards');
 const { connect } = require('mongoose');
 const { signIn, createUser } = require('./controllers/auth');
 const auth = require('./middlewares/auth');
-
-
-const { PORT = 3000 } = process.env;
+const config = require('./config')
 
 const app = express();
 
-connect('mongodb://localhost:27017/mestodb', {
+connect(config.mongo.url, {
   useNewUrlParser: true,
   useCreateIndex: true,
     useFindAndModify: false
@@ -44,8 +42,7 @@ app.use((err, req, res, next) => {
   res.send({ message: err.message });  
 });
 
-app.listen(PORT, ()=>{
-  console.log(`!!! RUNNING ON PORT: ${PORT}`);
-  
+app.listen(config.server.port, () => {
+  console.log(`Magic happens on port ${config.server.port}`)
 })
 
