@@ -19,8 +19,12 @@ const handleUser = (user, res) => {
     res.status(500).send({ message: err.message })});
 };
 
-const getUsers = (req, res) => {  
-  handleUser(User.find({}), res);  
+const getUsers = (req, res) => { 
+  let skipBy = 0;
+  let limitBy = 0; 
+  if(req.query.limit)limitBy = parseInt(req.query.limit);
+  if(req.query.skip)skipBy = parseInt(req.query.skip);    
+  handleUser(User.find({}).skip(skipBy).limit(limitBy), res);  
 };
 
 const getUser = (req, res) => {
