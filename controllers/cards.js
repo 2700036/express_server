@@ -1,13 +1,13 @@
 const Card = require('../models/card');
 
 const doesCardExist = (card, res) => {
-  card 
+  return card 
   ? res.send(card) 
   : res.status(404).send({ message: 'карточка не найдена' })
 };
 
 const handleCard = (card, res) => {
-  card.then(card=>doesCardExist(card, res))
+  return card.then(card=>doesCardExist(card, res))
   .catch(err => {
     console.log(err.name)
     err.name == 'CastError' 

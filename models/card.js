@@ -10,8 +10,13 @@ const cardSchema = new Schema({
   link: {
     type: String,
     required: true,
-    validate: /^(http:\/\/|https:\/\/)(www.)?[-a-zA-Z0-9@:%._\/+~=]{1,256}#?$/,
-    message: "Cсылка неверного формата",
+    validate: 
+    {
+    validator: v=> {
+      return /^(http:\/\/|https:\/\/)(www.)?[-a-zA-Z0-9@:%._\/+~=]{1,256}#?$/.test(v)
+    },
+    message: "Cсылка неверного формата"
+    }
   },
   owner: {
     type: Schema.Types.ObjectId,

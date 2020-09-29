@@ -1,9 +1,12 @@
+require('dotenv').config(); 
+
 const express = require('express');
-const path = require('path');
 const bodyParser = require('body-parser');
 const usersRoute = require('./routes/users')
 const cardsRoute = require('./routes/cards');
 const { connect } = require('mongoose');
+const { signIn, createUser } = require('./controllers/auth');
+const auth = require('./middlewares/auth');
 
 
 const { PORT = 3000 } = process.env;
@@ -17,23 +20,32 @@ connect('mongodb://localhost:27017/mestodb', {
 });
 
 app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({ extended: true }));
 // app.use(express.static(path.join(__dirname, 'public')))
 
-//? Времяночка
-app.use((req, res, next) => {
-  req.user = {
-    _id: '5f4e7374194bc35bd42722e4'
-  };
-  next();
-});
 
-app.use('/', usersRoute);
-app.use('/', cardsRoute);
+app.post('/signup', createUser);
+app.post('/signin', signIn);
+
+app.use(auth);
+
+app.use(usersRoute);
+app.use(cardsRoute);
+
 app.get('*', (req, res)=>{
   res.status(404).send({message: 'Запрашиваемый ресурс не найден'});
 });
+
+app.use((err, req, res, next) => {
+  console.error(err);
+  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+      return res.status(400).send({ message: err.message }); // Bad request
+  }
+  res.send({ message: err.message });  
+});
+
 app.listen(PORT, ()=>{
-  console.log(`server running on PORT ${PORT}`);
+  console.log(`!!! RUNNING ON PORT: ${PORT}`);
   
 })
 
